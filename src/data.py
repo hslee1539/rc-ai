@@ -3,15 +3,23 @@ import os
 import numpy as np
 import PIL.Image as pilimg
 import matplotlib.pyplot as plt
+import multiprocessing
 
 # 내부 모듈
 
 from data_function import *
 from data_model import DataModel
+from threaded_generator import ThreadedGenerator
 
 
 def _end(args):
     return args[1]
+
+
+def threadOn(iter):
+    ""
+    for item in iter:
+        yield ThreadedGenerator(item)
 
 def load_img(data_model: DataModel):
     img_files = start_img(data_model)
@@ -23,8 +31,12 @@ def load_img(data_model: DataModel):
 def load_rotated_imgs(data_model: DataModel):
     img_files = start_img(data_model)
     raw_imgs = map(file_to_img, img_files)
+    #raw_imgs = threadOn(raw_imgs)
     rotated_imgs = map(create_rotated_imgs, raw_imgs)
+    #rotated_imgs = ThreadedGenerator(rotated_imgs)
     resized_imgs = resize_rotated_imgs(rotated_imgs)
+    #resized_imgs = threadOn(resized_imgs)
+    
     imgs = list(resized_imgs)
     return np.array(imgs)
 
@@ -46,10 +58,7 @@ def load_label_img(data_model: DataModel):
 
 
 
-def load():
-    """"""
-    for fileName in os.listdir(PATH_IMGS + "/" + path):
-        """"""
+
 
 
 def _resize(src, w, h):
