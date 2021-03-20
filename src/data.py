@@ -34,7 +34,7 @@ def load(data_model: DataModel):
 
     x_eval = []
     y_eval = []
-    with multiprocessing.Pool(4) as pool:
+    with multiprocessing.Pool(8) as pool:
         rows = pool.map(create_rotated_set, pre_set_args)
         random.seed(100)
         random.shuffle(rows)
@@ -64,5 +64,5 @@ if __name__ == "__main__":
     for i in range(100):
         plt.imshow(x[i * 10])
         plt.show()
-        plt.imshow(y[i * 10])
+        plt.imshow(np.insert(y[i * 10], 2, 0, -1))
         plt.show()

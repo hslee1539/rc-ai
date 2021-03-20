@@ -78,7 +78,7 @@ def _open_pre_output(data_model: DataModel, output_file_name):
         data_model=data_model, lines=left_top_numeric_lines)
     output_ndimage = _merge_and_convert_ndimage(
         data_model, scaled_numberic_lines)
-    return pilimg.fromarray((output_ndimage * 250).astype(np.uint8))
+    return pilimg.fromarray((output_ndimage * 255).astype(np.uint8))
 
 def _open_and_read_lines(file_name):
     with open(f"{file_name}", "r") as file:
@@ -105,7 +105,9 @@ def _scale_numeric_lines(data_model: DataModel, lines):
 
 
 def _merge_and_convert_ndimage(data_model: DataModel, lines):
-    result = np.zeros(data_model.pre_shape)
+    pre_shape = list(data_model.pre_shape)
+    pre_shape[-1] = data_model.output_shape[-1]
+    result = np.zeros(pre_shape)
     for line in lines:
         label, x, y, w, h = line
         for pos_x in range(w):

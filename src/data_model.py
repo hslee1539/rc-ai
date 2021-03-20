@@ -1,3 +1,4 @@
+import numpy as np
 
 class DataModel:
     img_path : str
@@ -7,6 +8,7 @@ class DataModel:
     pre_shape : tuple
     input_shape : tuple
     output_shape : tuple
+    dtype = np.float32
 
     def __init__(self, img_path: str, label_path: str, pre_shape: tuple, input_shape: tuple, output_shape: tuple):
         """"""
