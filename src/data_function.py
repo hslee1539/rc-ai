@@ -54,8 +54,10 @@ def create_rotated_set(set_arg):
     data_model, pre_input, pre_output, angle = set_arg
     pre_input: pilimg.Image
     pre_output: pilimg.Image
+    rotated_output = np.array(pre_output.rotate(angle).resize(data_model.output_shape[0:2]))
+    rotated_output = _threshold(rotated_output)
     print(f"process angle = {angle}")
-    return (np.array(pre_input.rotate(angle).resize(data_model.input_shape[0:2])), np.array(pre_output.rotate(angle).resize(data_model.output_shape[0:2])))
+    return (np.array(pre_input.rotate(angle).resize(data_model.input_shape[0:2])), rotated_output)
 
 def create_rotated_sets(data_model: DataModel, pre_set):
     pre_input, pre_output = pre_set
@@ -76,9 +78,10 @@ def _open_pre_output(data_model: DataModel, output_file_name):
     left_top_numeric_lines = _center_to_left_top_lines(numeric_lines)
     scaled_numberic_lines = _scale_numeric_lines(
         data_model=data_model, lines=left_top_numeric_lines)
-    output_ndimage = _merge_and_convert_ndimage(
+    merged_lines = _merge_lines(
         data_model, scaled_numberic_lines)
-    return pilimg.fromarray((output_ndimage * 255).astype(np.uint8))
+    convolved_imgs = _apply_avg_filter(merged_lines)
+    return pilimg.fromarray((convolved_imgs * 255).astype(np.uint8))
 
 def _open_and_read_lines(file_name):
     with open(f"{file_name}", "r") as file:
@@ -104,7 +107,7 @@ def _scale_numeric_lines(data_model: DataModel, lines):
         yield (label, x, y, w, h)
 
 
-def _merge_and_convert_ndimage(data_model: DataModel, lines):
+def _merge_lines(data_model: DataModel, lines):
     pre_shape = list(data_model.pre_shape)
     pre_shape[-1] = data_model.output_shape[-1]
     result = np.zeros(pre_shape)
@@ -114,6 +117,22 @@ def _merge_and_convert_ndimage(data_model: DataModel, lines):
             for pos_y in range(h):
                 result[pos_y + y, pos_x + x, label] = 1.
     return result
+
+avg_filter = np.ones([13,13]) / 13 / 13
+def _threshold(x):
+    if x > 0.01:
+        return 1.0
+    else:
+        return 0.0
+_threshold = np.vectorize(_threshold)
+
+def _apply_avg_filter(merged_lines: np.ndarray):
+    convolved_img = merged_lines.copy()
+    convolved_img[:,:,0] = scipy.ndimage.convolve(merged_lines[:,:,0], avg_filter, mode="constant")
+    convolved_img[:,:,1] = scipy.ndimage.convolve(merged_lines[:,:,1], avg_filter, mode="constant")
+    return _threshold(convolved_img)
+
+
 
 def _center_to_left_top_lines(lines):
     for line in lines:

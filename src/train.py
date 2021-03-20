@@ -39,8 +39,8 @@ if __name__ == '__main__':
     real_y = np.insert(real_y, 2, 0, -1)
 
     for i in range(real_y.shape[0]):
-        plt.imshow(no_trained_y[i], vmin=0., vmax=1.)
-        plt.show()
+        #plt.imshow(no_trained_y[i], vmin=0., vmax=1.)
+        #plt.show()
         plt.imshow(trained_y[i], vmin=0., vmax=1.)
         plt.show()
         plt.imshow(real_y[i], vmin=0., vmax=1.)
