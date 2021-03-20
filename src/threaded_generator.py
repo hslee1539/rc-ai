@@ -1,7 +1,7 @@
 # A simple generator wrapper, not sure if it's good for anything at all.
 # With basic python threading
 from threading import Thread
-import threading, time
+import threading, time, multiprocessing
 
 try:
     from queue import Queue
@@ -53,6 +53,48 @@ class ThreadedGenerator(object):
 
         self._thread.join()
 
+class PoolGenerator(object):
+    """
+    Generator that runs on a separate thread, returning values to calling
+    thread. Care must be taken that the iterator does not mutate any shared
+    variables referenced in the calling thread.
+    """
+
+    def __init__(self, iterator,
+                 sentinel=object(),
+                 queue_maxsize=0,
+                 daemon=True,
+                 Thread=Thread,
+                 Queue=Queue):
+        self._iterator = iterator
+        self._sentinel = sentinel
+        self._queue = Queue(maxsize=queue_maxsize)
+        self._thread = Thread(
+            name=repr(iterator),
+            target=self._run
+        )
+        self._thread.daemon = daemon
+
+    def __repr__(self):
+        return 'PoolGenerator({!r})'.format(self._iterator)
+
+    def _run(self):
+        try:
+            
+            
+            for value in self._iterator:
+                self._queue.put(value)
+
+        finally:
+            self._queue.put(self._sentinel)
+
+    def __iter__(self):
+        self._thread.start()
+        for value in iter(self._queue.get, self._sentinel):
+            yield value
+
+        self._thread.join()
+
 
 def threadOn(iterator):
     return ThreadedGenerator(iterator)
@@ -65,6 +107,10 @@ def task1(s):
     for i in range(2):
         time.sleep(3)
         yield s
+
+def task11(s):
+    time.sleep(6)
+    return (s, s)
     
 def task2(s):
     for i in s:
@@ -93,17 +139,25 @@ def loops(s):
 
 
 
+
+
 if __name__ == "__main__":
     start = time.time()
-    s = task1(1)
+    s = task1(4)
     #s = threadOn(s)
     s = threadOn(s)
     #s = map(threadOn, s)
     #s = list(s)
+
+    with multiprocessing.Pool(4) as pool:
+        s = pool.map(task11, s)
     
-    s = map(task1, s)
+    
+    #s = map(task11, s)
+    #s = map(threadOn, s)
     
     #s = threadsOn(s)
+
     #s = task2(s)
     #s = threadOn(s)
     #s = threadOn(s)
@@ -111,7 +165,7 @@ if __name__ == "__main__":
     #s = task3(s)
     #s = threadsOn(s)
     
-    loops(s)
+        loops(s)
     end = time.time()
 
     print(end - start)
