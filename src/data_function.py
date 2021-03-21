@@ -29,6 +29,7 @@ def find_file_name_sets(data_model: DataModel):
         output_file_name = None
         for output_file_name in output_file_names:
             if output_file_name.replace(".txt", "") == input_file_name.replace(".jpg", ""):
+                print(f"find data x:{input_file_name}, y:{output_file_name}")
                 yield (input_file_name, output_file_name)
 
 def open_pre_sets(data_model: DataModel, file_name_sets):
@@ -47,8 +48,8 @@ def create_rotated_set_args(data_model: DataModel, pre_sets):
         pre_input, pre_output = pre_set
         pre_input: pilimg.Image
         pre_output: pilimg.Image
-        for angle in range(180):
-            yield (data_model, pre_input, pre_output, angle * 2)
+        for angle in range(360):
+            yield (data_model, pre_input, pre_output, angle)
 
 def create_rotated_set(set_arg):
     data_model, pre_input, pre_output, angle = set_arg
@@ -56,7 +57,6 @@ def create_rotated_set(set_arg):
     pre_output: pilimg.Image
     rotated_output = np.array(pre_output.rotate(angle).resize(data_model.output_shape[0:2]))
     rotated_output = _threshold(rotated_output) * 255
-    print(f"process angle = {angle}")
     return (np.array(pre_input.rotate(angle).resize(data_model.input_shape[0:2])), rotated_output)
 
 def create_rotated_sets(data_model: DataModel, pre_set):

@@ -30,12 +30,12 @@ def load():
             filters=13, kernel_size=(7, 7), strides=1, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Conv2D(
-            filters=17, kernel_size=(13, 13), strides=2, activation="relu"))
+            filters=17, kernel_size=(13, 13), strides=1, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Dropout(0.5))
         model.add(tf.keras.layers.Conv2D(
             filters=2, kernel_size=(5,5), strides=1,activation="relu"))
-        model.build((1, 256, 256, 3))
+        model.build((1, 100, 100, 3))
         #model.compile(optimizer="adam", loss="binary_crossentropy")
         model.compile(optimizer="adam", loss="MeanSquaredLogarithmicError")
 
