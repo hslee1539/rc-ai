@@ -47,15 +47,15 @@ def create_rotated_set_args(data_model: DataModel, pre_sets):
         pre_input, pre_output = pre_set
         pre_input: pilimg.Image
         pre_output: pilimg.Image
-        for angle in range(360):
-            yield (data_model, pre_input, pre_output, angle)
+        for angle in range(180):
+            yield (data_model, pre_input, pre_output, angle * 2)
 
 def create_rotated_set(set_arg):
     data_model, pre_input, pre_output, angle = set_arg
     pre_input: pilimg.Image
     pre_output: pilimg.Image
     rotated_output = np.array(pre_output.rotate(angle).resize(data_model.output_shape[0:2]))
-    rotated_output = _threshold(rotated_output)
+    rotated_output = _threshold(rotated_output) * 255
     print(f"process angle = {angle}")
     return (np.array(pre_input.rotate(angle).resize(data_model.input_shape[0:2])), rotated_output)
 
@@ -118,7 +118,7 @@ def _merge_lines(data_model: DataModel, lines):
                 result[pos_y + y, pos_x + x, label] = 1.
     return result
 
-avg_filter = np.ones([13,13]) / 13 / 13
+avg_filter = np.ones([3,3]) / 3 / 3
 def _threshold(x):
     if x > 0.01:
         return 1.0

@@ -13,7 +13,6 @@ SAVED_MODEL_PATH = os.path.dirname(
 
 
 def load():
-    """"""
     model: tf.keras.Model
 
     try:
@@ -25,21 +24,20 @@ def load():
             filters=5, kernel_size=(3, 3), strides=1, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Conv2D(
-            filters=7, kernel_size=(3, 3), strides=2, activation="relu"))
+            filters=7, kernel_size=(5, 5), strides=2, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Conv2D(
-            filters=13, kernel_size=(3, 3), strides=1, activation="relu"))
+            filters=13, kernel_size=(7, 7), strides=1, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Conv2D(
-            filters=17, kernel_size=(3, 3), strides=2, activation="relu"))
+            filters=17, kernel_size=(13, 13), strides=2, activation="relu"))
         model.add(tf.keras.layers.BatchNormalization())
+        model.add(tf.keras.layers.Dropout(0.5))
         model.add(tf.keras.layers.Conv2D(
-            filters=2, kernel_size=(12,12), activation="relu"))
-        #model.add(tf.keras.layers.Flatten())
-        #model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
+            filters=2, kernel_size=(5,5), strides=1,activation="relu"))
         model.build((1, 256, 256, 3))
         #model.compile(optimizer="adam", loss="binary_crossentropy")
-        model.compile(optimizer="adam", loss="mse")
+        model.compile(optimizer="adam", loss="MeanSquaredLogarithmicError")
 
     return model
 
