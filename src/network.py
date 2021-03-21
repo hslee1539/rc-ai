@@ -12,11 +12,11 @@ SAVED_MODEL_PATH = os.path.dirname(
     __file__) + "/model"  # 경로 중 디렉토리명만 얻고 model 폴더 설정
 
 
-def load():
+def load(path = SAVED_MODEL_PATH):
     model: tf.keras.Model
 
     try:
-        model = tf.keras.models.load_model(SAVED_MODEL_PATH)
+        model = tf.keras.models.load_model(path)
     except Exception as identifier:
         # 모델이 없는 경우
         model = tf.keras.Sequential()
