@@ -17,6 +17,7 @@ def load(path = SAVED_MODEL_PATH):
 
     try:
         model = tf.keras.models.load_model(path)
+        print("load")
     except Exception as identifier:
         # 모델이 없는 경우
         model = tf.keras.Sequential()
@@ -43,5 +44,6 @@ def load(path = SAVED_MODEL_PATH):
 
 
 if __name__ == "__main__":
-    model = load()
+    model = load("my-net-v1.h5")
+    
     print(model.summary())
