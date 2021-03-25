@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import PIL.Image as pilimg
+from PIL import ImageOps
 import scipy.ndimage
 # 내부 모듈
 from data_model import DataModel
@@ -69,6 +70,7 @@ def create_rotated_sets(data_model: DataModel, pre_set):
 
 def _open_pre_input(data_model: DataModel, input_file_name):
     raw_input = pilimg.open(f"{data_model.img_path}/{input_file_name}")
+    raw_input = ImageOps.exif_transpose(raw_input)
     return raw_input.resize(data_model.pre_shape[0:2])
 
 def _open_pre_output(data_model: DataModel, output_file_name):
