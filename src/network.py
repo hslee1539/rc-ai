@@ -14,6 +14,7 @@ SAVED_MODEL_PATH = os.path.dirname(
     __file__) + "/model"  # 경로 중 디렉토리명만 얻고 model 폴더 설정
 
 
+# loss 0.069?
 def load(path=SAVED_MODEL_PATH):
     model: tf.keras.Model
 
@@ -45,6 +46,9 @@ def load(path=SAVED_MODEL_PATH):
     return model
 
 
+# 예전 v2 loss 0.06
+# 최종 v2 loss 0.041
+# 경량인데 더 좋음 ㄷㄷ
 def load_v2(path=SAVED_MODEL_PATH):
     model: tf.keras.Model
     try:
@@ -99,6 +103,81 @@ def load_v2(path=SAVED_MODEL_PATH):
 
     return model
 
+## glsl 보면 gpu 연산은 vec4 계산은 파이프라인화 되어 있어 4채널 사용하는게 성능에 좋음
+## 그리고 생각보다 일반적인 전략에 비해 크게 나쁘지도 않음
+def create_conv_group(input_layer: tf.keras.layers.Layer):
+    conv1 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), padding="same", strides=1, activation="relu")(input_layer)
+    conv2 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), strides=2, activation="relu")(conv1)
+    conv3 = tf.keras.layers.Conv2D(4, kernel_size=(
+            5, 5), padding="same", strides=1, activation="relu")(conv2)
+
+    return conv3
+
+def create_down_group(input_layer):
+    conv1 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), strides=2, activation="relu")(input_layer)
+    conv2 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), strides=1, activation="relu")(conv1)
+    
+    return conv2
+
+def create_same_group(input_layer):
+    conv1 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), strides=1, activation="relu")(input_layer)
+    return conv1
+
+def create_up_group(input_layer):
+    conv1 = tf.keras.layers.UpSampling2D()(input_layer)
+    conv2 = tf.keras.layers.Conv2D(4, kernel_size=(
+            3, 3), padding="same", strides=1, activation="relu")(conv1)
+    
+    return conv2
+    
+
+    
+
+
+def load_v3(path=SAVED_MODEL_PATH):
+    model: tf.keras.Model
+    try:
+        model = tf.keras.models.load_model(path)
+        print("load")
+    except Exception as _:
+        input_layer = tf.keras.layers.Input((125, 125, 3))
+
+        group1 = create_conv_group(input_layer)
+        group1_output = tf.keras.layers.BatchNormalization()(group1)
+
+        group2 = create_conv_group(group1_output)
+        group2_output = tf.keras.layers.BatchNormalization()(group2)
+
+        group3 = create_conv_group(group2_output)
+        group3_output = tf.keras.layers.BatchNormalization()(group3)
+
+        group4 = create_down_group(group1_output)
+        group4_output = group4
+
+        group5 = create_same_group(group2_output)
+        group5_output = group5
+
+        group6 = create_up_group(group3_output)
+        group6_output = group6
+
+        concat = tf.keras.layers.concatenate(
+            [group4_output, group5_output, group6_output])
+
+        conv1 = tf.keras.layers.Conv2D(4, kernel_size=(
+            5, 5), padding="same", strides=1, activation="relu")(concat)
+
+        conv2 = tf.keras.layers.Conv2D(2, kernel_size=(
+            3, 3), padding="same", strides=1, activation="relu")(conv1)
+
+        model = tf.keras.Model(inputs=input_layer, outputs=conv2)
+        model.compile(optimizer="adam", loss="MeanSquaredLogarithmicError")
+
+        return model
 
 def apply_shape_v2(data_model: DataModel):
     data_model.input_shape = (125, 125, 3)
@@ -116,7 +195,7 @@ def __convert_lite():
 if __name__ == "__main__":
     #model = load()
     #model = load_v2("my-net-v2")
-    model = load_v2()
+    model = load_v3()
     
 
     print(model.summary())
