@@ -2,7 +2,7 @@ import os
 import numpy as np
 import PIL.Image as pilimg
 from PIL import ImageOps
-import scipy.ndimage
+#import scipy.ndimage
 # 내부 모듈
 from data_model import DataModel
 from threaded_generator import threadsOn
@@ -14,7 +14,7 @@ def test(data_model: DataModel):
     file_name_sets = find_file_name_sets(data_model)
     pre_sets = open_pre_sets(data_model=data_model, file_name_sets= file_name_sets)
 
-    with multiprocessing.Pool(4) as pool:
+    with multiprocessing.Pool(8) as pool:
         pre_set_args = create_rotated_set_args(data_model, pre_sets)
         rotated_tables = pool.map(create_rotated_set, pre_set_args)
     rotated_tables = threadsOn(rotated_tables) # pre_sets 수 만큼 쓰래드 생성
@@ -128,10 +128,12 @@ def _threshold(x):
         return 0.0
 _threshold = np.vectorize(_threshold)
 
+
+
 def _apply_avg_filter(merged_lines: np.ndarray):
     convolved_img = merged_lines.copy()
-    convolved_img[:,:,0] = scipy.ndimage.convolve(merged_lines[:,:,0], avg_filter, mode="constant")
-    convolved_img[:,:,1] = scipy.ndimage.convolve(merged_lines[:,:,1], avg_filter, mode="constant")
+    #convolved_img[:,:,0] = scipy.ndimage.convolve(merged_lines[:,:,0], avg_filter, mode="constant")
+    #convolved_img[:,:,1] = scipy.ndimage.convolve(merged_lines[:,:,1], avg_filter, mode="constant")
     return _threshold(convolved_img)
 
 

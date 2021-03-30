@@ -42,17 +42,23 @@ def load(data_model: DataModel):
         index = 0
         for row in rows:
             if index < 100:
-                x_eval.append(row[0])
-                y_eval.append(row[1])
-            elif (index / len(rows) < 0.7):
-                x_train.append(row[0])
-                y_train.append(row[1])
+                x_eval.append(row[0] / 255 * 2 - 1)
+                y_eval.append(row[1] / 255)
+            elif (index // 100 * 100 / len(rows) < 0.7):
+                x_train.append(row[0] / 255 * 2 - 1)
+                y_train.append(row[1] / 255)
             else:
-                x_test.append(row[0])
-                y_test.append(row[1])
+                x_test.append(row[0] / 255 * 2 - 1)
+                y_test.append(row[1] / 255)
             index += 1
 
-    return (x_train, y_train, x_eval, y_eval, x_test, y_test)
+    return (
+        np.array(x_train, dtype=data_model.dtype), 
+        np.array(y_train, dtype=data_model.dtype), 
+        np.array(x_eval, dtype=data_model.dtype), 
+        np.array(y_eval, dtype=data_model.dtype), 
+        np.array(x_test, dtype=data_model.dtype), 
+        np.array(y_test, dtype=data_model.dtype))
 
 
 if __name__ == "__main__":
