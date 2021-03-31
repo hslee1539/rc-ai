@@ -191,6 +191,13 @@ def __convert_lite():
     with open("my-net-v2.tflite", "wb") as file:
         file.write(tflite_model)
 
+def convert_lite(input_file: str, output_file: str):
+    converter = tf.lite.TFLiteConverter.from_saved_model(input_file)
+    tflite_model = converter.convert()
+
+    with open(output_file, "wb") as file:
+        file.write(tflite_model)
+
 
 if __name__ == "__main__":
     #model = load()
