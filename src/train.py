@@ -9,7 +9,7 @@ import gc
 
 def load_data_set():
     data_model = data.DataModel(
-        "../data/x", "../data/y", (100, 100, 3), (100, 100, 3), (25, 25, 2))
+        "./data/x", "./data/y", (100, 100, 3), (100, 100, 3), (25, 25, 2))
     data_model.input_shape = (125, 125, 3)
     data_model.output_shape = (28, 28, 2)
     data_model.pre_shape = (125, 125, 3)
@@ -38,4 +38,5 @@ def load_data_set_and_train():
 
     return (net, data_set)
 
-    
+if __name__ == "__main__":
+    net, data_set = load_data_set_and_train()
